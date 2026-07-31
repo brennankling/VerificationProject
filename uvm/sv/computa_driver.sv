@@ -2,15 +2,13 @@ class computa_driver extends uvm_driver #(computa_instruction);
 
   virtual interface computa_if vif;
 
-  // Number of instructions to assemble into one program image. Set by the
-  // test/sequence via config_db so the driver knows when the program is
-  // complete. chip_top has no live bus to stream instructions over, so
-  // there's no other signal for "done" to key off of.
+  // TEMPORARY: Use number of instructions to determine how long to drive for
+  // Known bug: If there are loops or jumps to previous pc values, the simulation will finish early if
+  // program_size is equal to just the number of instructions in imem 
   int unsigned program_size = 8;
 
-  // Where to write the assembled image before backdoor-loading it. Same
-  // %h-per-line format as sim/prog.hex, so it's inspectable/replayable
-  // standalone outside the UVM environment.
+  // Where to write the assembled image before loading it. Same
+  // %h-per-line format as sim/prog.hex
   string imem_file = "prog_gen.hex";
 
   // Number of instructions assembled by driver
@@ -34,7 +32,7 @@ class computa_driver extends uvm_driver #(computa_instruction);
     void'(uvm_config_db#(string)::get(this, "", "imem_file", imem_file));
   endfunction : build_phase
 
-  // Assembles a program from the sequencer and backdoor-loads it into the
+  // Assembles a program from the sequencer and loads it into the
   // DUT's instruction memory. 
   // chip_top fetches from its own imem every cycle on its own, so once
   // the image is loaded the driver's job is done.
@@ -60,8 +58,8 @@ class computa_driver extends uvm_driver #(computa_instruction);
     vif.load_imem(imem_file);
     `uvm_info(get_type_name(), $sformatf("Loaded %0d-instruction program from %s", instrs.size(), imem_file), UVM_MEDIUM)
 
-    // Debug: confirm the backdoor load actually landed in the DUT
-    // instance itself, not just that the right hex file was written.
+    // Debug: confirm the imem actually landed in the DUT
+    // instance, not just that the hex file was written.
     foreach (instrs[i])
       `uvm_info(get_type_name(), $sformatf("Readback imem[%0d] = %h (wrote %h)", i, vif.read_imem(i), instrs[i]), UVM_LOW)
 

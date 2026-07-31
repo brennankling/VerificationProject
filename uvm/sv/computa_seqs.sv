@@ -66,8 +66,7 @@ class addi_seq extends computa_base_seq;
 endclass: addi_seq
 
 // ADDI
-// program_size = 103 (3 directed corner cases + 100 randomized; keep
-// NUM_INSTRUCTIONS equal to that total if body() below changes)
+// program_size = 103 (3 directed corner cases + 100 randomized
 class addi_extensive_seq extends computa_base_seq;
   `uvm_object_utils(addi_extensive_seq)
 
@@ -113,11 +112,8 @@ endclass: addi_extensive_seq
 
 // R-type ALU ops: ADD/SUB/SLL/SLT/SLTU/XOR/SRL/SRA/OR/AND
 // program_size = 222 (30 register preload + 10 op-coverage + 70 operand
-// corners [7 cases x 10 ops, each op gets its own pass since e.g. SUB
-// with rs1==rs2 and XOR with rs1==rs2 both reduce to "should give 0" but
-// exercise completely different logic] + 12 shift-amount setup/op pairs +
-// 100 randomized; keep NUM_INSTRUCTIONS equal to that total if body()
-// below changes)
+// corners [7 cases x 10 ops] + 12 shift-amount setup/op pairs +
+// 100 randomized
 class register_seq extends computa_base_seq;
   `uvm_object_utils(register_seq)
 
@@ -141,11 +137,7 @@ class register_seq extends computa_base_seq;
     `uvm_info(get_type_name(), "Calling register_seq", UVM_LOW)
 
     // Preload x1..x30 with varied, non-zero signed values before anything
-    // else runs. Straight out of reset every GPR is 0 (reg_file.sv), so
-    // without this, most of the instructions below would just be
-    // operating on 0/0, exercising decode/control, but not the ALU's
-    // actual data path across real operand diversity (sign extension,
-    // negatives, near-range values). x0 stays hardwired zero; x31 is
+    // else runs. x0 stays hardwired zero; x31 is
     // reserved as SHAMT_SCRATCH and gets (re)loaded down in the
     // shift-amount section instead of here.
     for (int r = 1; r <= 30; r++) begin
@@ -167,15 +159,7 @@ class register_seq extends computa_base_seq;
       finish_item(item);
     end
 
-    // Operand corner cases: reg_file.sv special-cases x0, and a
-    // single-cycle datapath reading rs1/rs2 combinationally the same
-    // cycle it commits rd deserves explicit rd==rs1/rd==rs2 aliasing
-    // checks too. Run all 7 corner cases against every op rather than
-    // spreading one case per op: e.g. SUB with rs1==rs2 and XOR with
-    // rs1==rs2 both reduce to "should give 0" architecturally, but
-    // exercise completely different logic (a subtractor vs. an
-    // XOR-cancel), so a bug specific to one wouldn't show up testing
-    // only the other.
+    // Run all 7 corner cases against every op
     foreach (ops[i]) begin
       item = register_instruction::type_id::create("item");
       start_item(item);
@@ -220,9 +204,9 @@ class register_seq extends computa_base_seq;
       finish_item(item);
     end
 
-    // Shift-amount corner cases: rs2's *value*, not its index, selects
-    // the shift amount, so a setup ADDI stages a known value (0, then
-    // the max 31) into a scratch register before referencing it as rs2.
+    // Shift-amount corner cases: rs2's value selects
+    // the shift amount, so a setup ADDI stages a known value (0 through
+    // the max 31) into a scratch register to use as rs2.
     foreach (shift_ops[i]) begin
       bit [11:0] shamt_vals[2] = '{12'd0, 12'd31};
       foreach (shamt_vals[j]) begin

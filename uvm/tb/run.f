@@ -24,7 +24,7 @@
 +UVM_VERBOSITY=UVM_FULL 
 
 // (un)comment lines to select test. Keep -covtest below in sync with
-// whichever UVM_TESTNAME is active -- each distinct -covtest name gets
+// whichever UVM_TESTNAME is active. Each distinct -covtest name gets
 // its own coverage snapshot under cov_work/scope/<name>, so switching
 // tests without updating it will silently mix that run's coverage into
 // the previous test's snapshot instead of keeping them separate.

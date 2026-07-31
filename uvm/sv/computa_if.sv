@@ -1,9 +1,7 @@
 // chip_top exposes only clk/rst_n, so there is no instruction/data bus to
 // drive or monitor. This interface carries architectural-state taps
-// (pc, regfile, memory access) instead of a streaming protocol. Those taps
-// are wired to dut's internal nets at the hw_top instantiation site, since
-// hw_top is dut's parent and can legally reference them by hierarchical
-// name without any RTL changes.
+// (pc, regfile, memory access). Those taps
+// are wired to dut's internal nets at the hw_top instantiation site
 interface computa_if (
     input logic        clock,
     input logic        reset,        // active-high (chip_top's rst_n inverted at instantiation)
@@ -24,15 +22,13 @@ timeprecision 100ps;
     // Backdoor-load a program image into instruction memory. $readmemh
     // requires a statically-resolvable hierarchical name, which only a
     // module (not a UVM class) can reference, which is why this lives
-    // here instead of in the driver. Path is hardcoded to this
-    // testbench's top-level instance names (hw_top/dut); update it if the
-    // tb hierarchy changes.
+    // here instead of in the driver.
     task automatic load_imem(string hexfile);
         $readmemh(hexfile, hw_top.dut.u_fetch.imem);
     endtask : load_imem
 
     // Debug-only readback of a single imem word, to independently confirm
-    // a backdoor load actually landed in the DUT instance the monitor
+    // an imem load actually landed in the DUT instance the monitor
     // reads from 
     function automatic bit [31:0] read_imem(int idx);
         return hw_top.dut.u_fetch.imem[idx];

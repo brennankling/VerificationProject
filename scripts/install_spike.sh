@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Builds and installs Spike (github.com/riscv-software-src/riscv-isa-sim)
-# from source into a user-local prefix. No sudo required, only needs a
-# C++ toolchain (gcc/g++/make), which is standard on any dev box.
+# from source into a user-local prefix
 #
 # Usage: scripts/install_spike.sh [install_prefix]
 # Default install_prefix: $HOME/.local/spike
@@ -16,9 +15,7 @@ mkdir -p "$PREFIX/bin"
 
 # Spike's configure requires `dtc` (device-tree-compiler) on PATH at build
 # time. If it's not already installed system-wide and there's no sudo
-# available, grab just the binary out of the package. Downloading a
-# package (without installing it) doesn't require root on either
-# apt-based or dnf/yum-based systems, only actually installing it does.
+# available, grab just the binary out of the package.
 if ! command -v dtc >/dev/null 2>&1; then
   if command -v apt-get >/dev/null 2>&1; then
     echo "dtc not found on PATH; fetching it without sudo via apt-get download"
@@ -56,8 +53,7 @@ git clone --depth 1 https://github.com/riscv-software-src/riscv-isa-sim.git "$WO
 
 # This core (rtl/fetch_stage.sv) resets pc to 0 and has no CSR/privileged
 # state, but Spike unconditionally maps its debug module at physical
-# address 0x0 (DEBUG_START in platform.h) regardless of any command-line
-# flag, so a memory region could never be placed at address 0 without this
+# address 0x0 (DEBUG_START in platform.h), so a memory region could never be placed at address 0 without this
 # patch. Relocate DEBUG_START (and DEFAULT_RSTVEC, the tiny boot-rom stub)
 # out of low memory so address 0 is free, matching the DUT's own
 # addressing exactly with no offset bookkeeping needed anywhere.

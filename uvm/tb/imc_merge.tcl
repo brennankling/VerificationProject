@@ -1,15 +1,10 @@
 # Merges per-test coverage snapshots (each produced by an xrun run with
 # -covtest <name>, per run.f) into one merged model and writes a summary
-# report. Run from uvm/tb: imc resolves paths relative to the shell's
-# CWD, and running from the wrong directory produces confusing
-# CNTRDDR/INVDM errors.
+# report. Run from uvm/tb
 #
 #   /tools/software/cadence/vmanager/latest/tools.lnx86/vmgr/bin/imc -exec imc_merge.tcl
 #
-# (NOT the xcelium/.../tools/bin/launch_rmi_imc.sh wrapper, that's an
-# unrelated tool despite the name; imc actually lives under the separate
-# vmanager install tree.)
-#
+
 # Edit TESTS below to match whatever -covtest names you've actually run.
 
 set TESTS {addi_test register_test}
@@ -19,9 +14,6 @@ foreach t $TESTS {
     lappend snapshots ./cov_work/scope/$t
 }
 
-# No -initial_model: that flag expects an actual run name/path, not a
-# strategy keyword. "union" (combining what every run hit) is merge's
-# default behavior anyway, which is what we want here.
 if {[catch {merge -out ./cov_merged -overwrite $snapshots} err]} {
     puts "MERGE FAILED: $err"
     exit 1

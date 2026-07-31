@@ -4,9 +4,7 @@ class computa_monitor extends uvm_monitor;
 
   uvm_analysis_port #(computa_retire_txn) ap;
 
-  // How many instructions the loaded program contains. Bounds the
-  // sampling loop so the monitor doesn't record garbage past the end of
-  // imem as if it were real instructions.
+  // See computa_driver.sv
   int unsigned program_size = 8;
 
   // Number of instructions collected by monitor
@@ -37,9 +35,9 @@ class computa_monitor extends uvm_monitor;
   task run_phase(uvm_phase phase);
     computa_retire_txn txn;
 
-    // Reset is asserted from simulation start; wait for the (real) rising
+    // Reset is asserted from simulation start; wait for the rising
     // edge hw_top drives a few cycles in, then the falling edge that
-    // releases it. See hw_top.sv's reset generator.
+    // releases it. See hw_top.sv's reset generator
     @(posedge vif.reset);
     @(negedge vif.reset);
     `uvm_info(get_type_name(), "Detected Reset Done", UVM_MEDIUM)
@@ -62,7 +60,7 @@ class computa_monitor extends uvm_monitor;
       @(negedge vif.clock);
       txn.regs = vif.regs;
 
-      // Debug: dumps every register as plain text to the log.
+      // Debug: dumps every register as plain text to the log
       begin
         string dbg;
         dbg = "";

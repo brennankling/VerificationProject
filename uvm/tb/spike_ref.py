@@ -46,14 +46,12 @@ def find_spike(explicit):
 
 # This core (rtl/fetch_stage.sv) resets pc to 0 and has no CSR/privileged
 # state, but Spike unconditionally maps its debug module at physical
-# address 0x0 (riscv/platform.h's DEBUG_START), a hardcoded constant,
-# not a runtime flag. scripts/install_spike.sh builds Spike from a patched
+# address 0x0 (riscv/platform.h's DEBUG_START). scripts/install_spike.sh builds Spike from a patched
 # source tree that relocates DEBUG_START/DEFAULT_RSTVEC out of low memory
 # so address 0 is free for our own program, matching the DUT's own
-# zero-based addressing exactly (no PC-offset bookkeeping needed for
-# AUIPC/JAL/JALR results).
+# zero-based addressing exactly.
 MEM_BASE = 0x0
-MEM_SIZE = 0x4000  # 16 KiB, comfortably covers fetch_stage's IMEM_DEPTH (2048 words = 8 KiB)
+MEM_SIZE = 0x4000  # 16 KiB, covers fetch_stage's IMEM_DEPTH (2048 words = 8 KiB)
 
 EHDR_SIZE = 52
 PHDR_SIZE = 32

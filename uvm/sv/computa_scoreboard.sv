@@ -2,9 +2,8 @@
 // acting as the golden reference model, per the comparison
 // computa_retire_txn.sv already documents as its purpose.
 //
-// Offline trace diff, not lockstep DPI-C co-simulation: once the driver
-// has backdoor-loaded a program and reset drops, spike_ref.py is run once
-// (via $system()) against that same program file, and its Spike commit
+// Once the driver has loaded a program and reset drops, spike_ref.py is run once
+// against that same program file, and its Spike commit
 // log is parsed into expected_q. Actual transactions arriving from the
 // monitor are then compared against expected_q in order as write() is
 // called.
@@ -14,9 +13,7 @@ class computa_scoreboard extends uvm_scoreboard;
 
   uvm_analysis_imp #(computa_retire_txn, computa_scoreboard) actual_export;
 
-  // Same config_db keys computa_driver.sv already publishes, reused here
-  // so the scoreboard always agrees with the driver on the program and
-  // its length.
+  // See computa_sriver.sv
   int unsigned program_size = 8;
   string       imem_file    = "prog_gen.hex";
 
@@ -54,7 +51,7 @@ class computa_scoreboard extends uvm_scoreboard;
   endfunction: connect_phase
 
   // Waits for the same reset-drop edge the monitor syncs to, by which
-  // point computa_driver.sv has already backdoor-loaded the program. Runs
+  // point computa_driver.sv has already loaded the imem. Runs
   // Spike on that program and parses its commit log into expected_q,
   // drained by write() as actual retirements arrive.
   task run_phase(uvm_phase phase);
@@ -70,12 +67,8 @@ class computa_scoreboard extends uvm_scoreboard;
     @(negedge vif.reset);
 
     // env -u LD_LIBRARY_PATH: Xcelium's launch environment points
-    // LD_LIBRARY_PATH at Cadence's bundled shared libraries, which
-    // $system() leaks into this subshell and shadows the system python3's
-    // real libpython3.so, producing "undefined symbol:
-    // _Py_LegacyLocaleDetected" instead of running the script. Spike
-    // itself doesn't need this stripped; its libs are found via the
-    // rpath baked in at build time (scripts/install_spike.sh), not
+    // LD_LIBRARY_PATH at Cadence's bundled shared libraries. Spike's
+    //  libs are found via the rpath baked in at build time (scripts/install_spike.sh), not
     // LD_LIBRARY_PATH.
     cmd = $sformatf("env -u LD_LIBRARY_PATH python3 %s --hex %s --n %0d --out %s",
                      spike_ref_script, imem_file, program_size, trace_file);

@@ -23,7 +23,6 @@ class computa_agent extends uvm_agent;
 
   function void connect_phase(uvm_phase phase);
     if(is_active == UVM_ACTIVE) 
-      // Connect the driver and the sequencer 
       driver.seq_item_port.connect(sequencer.seq_item_export);
   endfunction : connect_phase
 

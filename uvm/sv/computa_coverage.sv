@@ -1,11 +1,5 @@
 import brv32_pkg::*;
 
-// Functional coverage collector: samples ISA diversity as instructions
-// retire, decoding each retiring instruction word the same way
-// rtl/decode_stage.sv does. Separate from computa_scoreboard (which only
-// checks correctness); subscribes to the same monitor.ap analysis port
-// scoreboard does, so both run off the exact stream of instructions that
-// actually executed on the DUT, not the randomized stimulus directly.
 class computa_coverage extends uvm_component;
 
   uvm_analysis_imp #(computa_retire_txn, computa_coverage) analysis_export;
@@ -19,13 +13,15 @@ class computa_coverage extends uvm_component;
 
   // Branch outcome can't be read off a single retire txn: there's no
   // taken/not-taken field on computa_retire_txn, only pc/instruction/regs.
-  // It only becomes knowable once the *next* instruction's pc is
+  // It only becomes knowable once the next instruction's pc is
   // observed, so a taken branch is sampled one retire late: write()
   // caches the previous instruction's opcode/pc, and if that was a
   // branch, derives taken = (this pc != prev_pc + 4) before sampling
-  // branch_cg. A branch that is the very last instruction of a program
+  // branch_cg. 
+  
+  // KNOWN BUG: A branch that is the very last instruction of a program
   // never gets its outcome sampled (no next txn ever arrives to reveal
-  // it), a known, minor gap rather than a bug.
+  // it)
   bit        have_prev;
   bit [31:0] prev_pc;
   opcode_t   prev_opcode;
@@ -46,8 +42,7 @@ class computa_coverage extends uvm_component;
       bins auipc   = {OP_AUIPC};
       // Decode as no-ops in this core (see decode_stage.sv) and nothing
       // in computa_instruction.sv generates them. Kept as explicit bins
-      // so an always-0% hit here reads as "not exercised by the
-      // generator", not as a coverpoint that silently doesn't exist.
+      // for future testing
       bins fence   = {OP_FENCE};
       bins system  = {OP_SYSTEM};
     }
@@ -64,10 +59,8 @@ class computa_coverage extends uvm_component;
       bins and_op     = {3'b111};
     }
 
-    // funct7[5] only distinguishes ADD/SUB (OP_REG) and SRL/SRA (OP_REG
-    // or OP_IMM shifts); everywhere else on OP_IMM those bits are just
-    // part of the immediate, not a real variant selector, so this only
-    // samples where funct7 is architecturally meaningful.
+    // funct7[5] only distinguishes ADD/SUB (OP_REG) and SRL/SRA  and everywhere else on OP_IMM those bits are just
+    // part of the immediate, not a real variant selector
     cp_alu_variant: coverpoint funct7[5]
       iff (opcode == OP_REG || (opcode == OP_IMM && funct3 inside {3'b001, 3'b101})) {
       bins base = {1'b0}; // ADD / SRL(I)
@@ -97,11 +90,7 @@ class computa_coverage extends uvm_component;
       bins sw = {SW};
     }
 
-    // reg_file.sv special-cases x0 (hardwired zero, writes silently
-    // dropped), worth confirming the generator sometimes targets it,
-    // since that's exactly the kind of edge real hardware bugs hide in.
-    // Gated to opcodes that actually have that operand (e.g. LUI/AUIPC/
-    // JAL read no registers at all).
+    // reg_file.sv special case x0 
     cp_rs1_x0: coverpoint (rs1 == 5'd0)
       iff (opcode inside {OP_REG, OP_IMM, OP_LOAD, OP_STORE, OP_BRANCH, OP_JALR});
     cp_rs2_x0: coverpoint (rs2 == 5'd0)
