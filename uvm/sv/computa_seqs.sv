@@ -239,11 +239,11 @@ endclass: register_seq
 
 // non-shift immediate instructions
 // ADDI already verified in order to use this sequence
-// 30 setup instructions, 6 directed, 6 * 10 corner cases, 100 randomized
+// 31 setup instructions, 6 directed, 6 * 10 corner cases, 100 randomized
 class non_shift_immediate_seq extends computa_base_seq;
   `uvm_object_utils(non_shift_immediate_seq)
 
-  parameter int unsigned NUM_INSTRUCTIONS = 196;
+  parameter int unsigned NUM_INSTRUCTIONS = 197;
 
   function new (string name = "non_shift_immediate_seq");
     super.new(name);
@@ -253,7 +253,7 @@ class non_shift_immediate_seq extends computa_base_seq;
 
     non_shift_immediate_instruction item;
     non_shift_immediate_instruction setup;
-    alu_op_t ops[10] = '{ALU_ADD, ALU_SLT, ALU_SLTU,
+    alu_op_t ops[6] = '{ALU_ADD, ALU_SLT, ALU_SLTU,
                           ALU_XOR,  ALU_OR, ALU_AND};
 
 
@@ -281,63 +281,63 @@ class non_shift_immediate_seq extends computa_base_seq;
 
     // Run all corner cases against every op
     foreach (ops[i]) begin
-      item = register_instruction::type_id::create("item");
+      item = non_shift_immediate_instruction::type_id::create("item");
       start_item(item);
       if (!item.randomize() with { alu_op == ops[i]; rd == 0; })
           `uvm_error(get_type_name(), "randomize failed")
       finish_item(item);
 
-      item = register_instruction::type_id::create("item");
+      item = non_shift_immediate_instruction::type_id::create("item");
       start_item(item);
       if (!item.randomize() with { alu_op == ops[i]; rs1 == 0; })
           `uvm_error(get_type_name(), "randomize failed")
       finish_item(item);
 
-      item = register_instruction::type_id::create("item");
+      item = non_shift_immediate_instruction::type_id::create("item");
       start_item(item);
       if (!item.randomize() with { alu_op == ops[i]; rd == rs1; })
           `uvm_error(get_type_name(), "randomize failed")
       finish_item(item);
 
-      item = register_instruction::type_id::create("item");
+      item = non_shift_immediate_instruction::type_id::create("item");
       start_item(item);
       if (!item.randomize() with { alu_op == ops[i]; imm == 0; })
           `uvm_error(get_type_name(), "randomize failed")
       finish_item(item);
 
-      item = register_instruction::type_id::create("item");
+      item = non_shift_immediate_instruction::type_id::create("item");
       start_item(item);
-      if (!item.randomize() with { alu_op == ops[i]; imm = -2048; })
+      if (!item.randomize() with { alu_op == ops[i]; imm == -2048; })
           `uvm_error(get_type_name(), "randomize failed")
       finish_item(item);
 
-      item = register_instruction::type_id::create("item");
+      item = non_shift_immediate_instruction::type_id::create("item");
       start_item(item);
-      if (!item.randomize() with { alu_op == ops[i]; imm = -2047; })
+      if (!item.randomize() with { alu_op == ops[i]; imm == -2047; })
           `uvm_error(get_type_name(), "randomize failed")
       finish_item(item);
 
-      item = register_instruction::type_id::create("item");
+      item = non_shift_immediate_instruction::type_id::create("item");
       start_item(item);
-      if (!item.randomize() with { alu_op == ops[i]; imm = 2047; })
+      if (!item.randomize() with { alu_op == ops[i]; imm == 2047; })
           `uvm_error(get_type_name(), "randomize failed")
       finish_item(item);
 
-      item = register_instruction::type_id::create("item");
+      item = non_shift_immediate_instruction::type_id::create("item");
       start_item(item);
-      if (!item.randomize() with { alu_op == ops[i]; imm = 2046; })
+      if (!item.randomize() with { alu_op == ops[i]; imm == 2046; })
           `uvm_error(get_type_name(), "randomize failed")
       finish_item(item);
       
-      item = register_instruction::type_id::create("item");
+      item = non_shift_immediate_instruction::type_id::create("item");
       start_item(item);
-      if (!item.randomize() with { alu_op == ops[i]; imm = -1; })
+      if (!item.randomize() with { alu_op == ops[i]; imm == -1; })
           `uvm_error(get_type_name(), "randomize failed")
       finish_item(item);
 
-      item = register_instruction::type_id::create("item");
+      item = non_shift_immediate_instruction::type_id::create("item");
       start_item(item);
-      if (!item.randomize() with { alu_op == ops[i]; imm = 1; })
+      if (!item.randomize() with { alu_op == ops[i]; imm == 1; })
           `uvm_error(get_type_name(), "randomize failed")
       finish_item(item);
     end
