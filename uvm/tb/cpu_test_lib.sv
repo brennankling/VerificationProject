@@ -110,3 +110,21 @@ class register_test extends base_test;
                                    register_seq::get_type());
   endfunction: build_phase
 endclass: register_test
+
+class non_shift_immediate_test extends base_test;
+
+  `uvm_component_utils(non_shift_immediate_test)
+
+  function void new (string name, uvm_component parent);
+    super.new(name, parent);
+  endfunction: new
+
+  function void build_phase(uvm_phase phase);
+    program_size = non_shift_immediate_seq::NUM_INSTRUCTIONS;
+    super.build_phase(phase);
+    uvm_config_wrapper::set(this, "tb.computa.agent.sequencer.run_phase",
+                                    "default_sequence",
+                                    non_shift_immediate_seq::get_type());
+  endfunction: build_phase
+
+endclass: non_shift_immediate_test

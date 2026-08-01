@@ -236,3 +236,119 @@ class register_seq extends computa_base_seq;
     end
   endtask: body
 endclass: register_seq
+
+// non-shift immediate instructions
+// ADDI already verified in order to use this sequence
+// 30 setup instructions, 6 directed, 6 * 10 corner cases, 100 randomized
+class non_shift_immediate_seq extends computa_base_seq;
+  `uvm_object_utils(non_shift_immediate_seq)
+
+  parameter int unsigned NUM_INSTRUCTIONS = 196;
+
+  function new (string name = "non_shift_immediate_seq");
+    super.new(name);
+  endfunction: new
+
+  task body();
+
+    non_shift_immediate_instruction item;
+    non_shift_immediate_instruction setup;
+    alu_op_t ops[10] = '{ALU_ADD, ALU_SLT, ALU_SLTU,
+                          ALU_XOR,  ALU_OR, ALU_AND};
+
+
+    `uvm_info(get_type_name(), "Calling non_shift_immediate_seq", UVM_LOW)
+
+    // Preload x1..x30 with varied, non-zero signed values before anything
+    // else runs. x0 stays hardwired zero
+    for (int r = 1; r <= 31; r++) begin
+      setup = non_shift_immediate_instruction::type_id::create("setup");
+      start_item(setup);
+      if (!setup.randomize() with { alu_op == ALU_ADD; rs1 == 0; rd == r; })
+          `uvm_error(get_type_name(), "randomize failed")
+      finish_item(setup);
+    end
+
+    // One directed instance of every non-shift I-type op, operands otherwise free.
+
+    foreach (ops[i]) begin
+      item = non_shift_immediate_instruction::type_id::create("item");
+      start_item(item);
+      if (!item.randomize() with { alu_op == ops[i]; })
+          `uvm_error(get_type_name(), "randomize failed")
+      finish_item(item);
+    end
+
+    // Run all corner cases against every op
+    foreach (ops[i]) begin
+      item = register_instruction::type_id::create("item");
+      start_item(item);
+      if (!item.randomize() with { alu_op == ops[i]; rd == 0; })
+          `uvm_error(get_type_name(), "randomize failed")
+      finish_item(item);
+
+      item = register_instruction::type_id::create("item");
+      start_item(item);
+      if (!item.randomize() with { alu_op == ops[i]; rs1 == 0; })
+          `uvm_error(get_type_name(), "randomize failed")
+      finish_item(item);
+
+      item = register_instruction::type_id::create("item");
+      start_item(item);
+      if (!item.randomize() with { alu_op == ops[i]; rd == rs1; })
+          `uvm_error(get_type_name(), "randomize failed")
+      finish_item(item);
+
+      item = register_instruction::type_id::create("item");
+      start_item(item);
+      if (!item.randomize() with { alu_op == ops[i]; imm == 0; })
+          `uvm_error(get_type_name(), "randomize failed")
+      finish_item(item);
+
+      item = register_instruction::type_id::create("item");
+      start_item(item);
+      if (!item.randomize() with { alu_op == ops[i]; imm = -2048; })
+          `uvm_error(get_type_name(), "randomize failed")
+      finish_item(item);
+
+      item = register_instruction::type_id::create("item");
+      start_item(item);
+      if (!item.randomize() with { alu_op == ops[i]; imm = -2047; })
+          `uvm_error(get_type_name(), "randomize failed")
+      finish_item(item);
+
+      item = register_instruction::type_id::create("item");
+      start_item(item);
+      if (!item.randomize() with { alu_op == ops[i]; imm = 2047; })
+          `uvm_error(get_type_name(), "randomize failed")
+      finish_item(item);
+
+      item = register_instruction::type_id::create("item");
+      start_item(item);
+      if (!item.randomize() with { alu_op == ops[i]; imm = 2046; })
+          `uvm_error(get_type_name(), "randomize failed")
+      finish_item(item);
+      
+      item = register_instruction::type_id::create("item");
+      start_item(item);
+      if (!item.randomize() with { alu_op == ops[i]; imm = -1; })
+          `uvm_error(get_type_name(), "randomize failed")
+      finish_item(item);
+
+      item = register_instruction::type_id::create("item");
+      start_item(item);
+      if (!item.randomize() with { alu_op == ops[i]; imm = 1; })
+          `uvm_error(get_type_name(), "randomize failed")
+      finish_item(item);
+    end
+
+    // Randomized stress
+    repeat (100) begin
+      item = non_shift_immediate_instruction::type_id::create("item");
+      start_item(item);
+      if (!item.randomize())
+          `uvm_error(get_type_name(), "randomize failed")
+      finish_item(item);
+    end
+  endtask: body
+endclass: non_shift_immediate_seq
