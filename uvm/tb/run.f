@@ -29,9 +29,10 @@
 // tests without updating it will silently mix that run's coverage into
 // the previous test's snapshot instead of keeping them separate.
 //+UVM_TESTNAME=base_test
-+UVM_TESTNAME=addi_test
+//+UVM_TESTNAME=addi_test
 //+UVM_TESTNAME=addi_extensive_test
 //+UVM_TESTNAME=register_test
++UVM_TESTNAME=non_shift_immediate_test
 
 //+SVSEED=random
 
@@ -46,7 +47,7 @@
 // to see merged test results run:
 // /tools/software/cadence/vmanager/latest/tools.lnx86/vmgr/bin/imc -load ./cov_work/cov_merged &
 -coverage all
--covtest addi_test
+-covtest non_shift_immediate_test
 -covoverwrite
 
 // compile files

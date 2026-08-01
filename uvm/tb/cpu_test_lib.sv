@@ -115,7 +115,7 @@ class non_shift_immediate_test extends base_test;
 
   `uvm_component_utils(non_shift_immediate_test)
 
-  function void new (string name, uvm_component parent);
+  function new(string name, uvm_component parent);
     super.new(name, parent);
   endfunction: new
 
