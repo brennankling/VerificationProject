@@ -6,7 +6,7 @@
 
 # Edit TEST below to match whichever -covtest name you want a report for.
 
-set TEST "addi_test"
+set TEST "shift_immediate_test"
 
 if {[catch {
     load -run ./cov_work/scope/${TEST}

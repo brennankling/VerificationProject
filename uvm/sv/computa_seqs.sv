@@ -307,13 +307,13 @@ class non_shift_immediate_seq extends computa_base_seq;
 
       item = non_shift_immediate_instruction::type_id::create("item");
       start_item(item);
-      if (!item.randomize() with { alu_op == ops[i]; imm == -2048; })
+      if (!item.randomize() with { alu_op == ops[i]; imm == 12'h800; }) // imm == -2048
           `uvm_error(get_type_name(), "randomize failed")
       finish_item(item);
 
       item = non_shift_immediate_instruction::type_id::create("item");
       start_item(item);
-      if (!item.randomize() with { alu_op == ops[i]; imm == -2047; })
+      if (!item.randomize() with { alu_op == ops[i]; imm == 12'h801; }) // imm == -2047
           `uvm_error(get_type_name(), "randomize failed")
       finish_item(item);
 
@@ -331,7 +331,7 @@ class non_shift_immediate_seq extends computa_base_seq;
       
       item = non_shift_immediate_instruction::type_id::create("item");
       start_item(item);
-      if (!item.randomize() with { alu_op == ops[i]; imm == -1; })
+      if (!item.randomize() with { alu_op == ops[i]; imm == 12'hFFF; }) // imm == -1
           `uvm_error(get_type_name(), "randomize failed")
       finish_item(item);
 
@@ -352,3 +352,176 @@ class non_shift_immediate_seq extends computa_base_seq;
     end
   endtask: body
 endclass: non_shift_immediate_seq
+
+
+// Shift Immediate Instructions
+// 31 setup, 3 * 32 * 2 testing each amount of shift for each shift type, 100 random
+class shift_immediate_seq extends computa_base_seq;
+  `uvm_object_utils(shift_immediate_seq)
+
+  parameter int unsigned NUM_INSTRUCTIONS = 323;
+    // Scratch register used to stage a known value ahead of the
+
+
+  function new (string name = "shift_immediate_seq");
+    super.new(name);
+  endfunction: new
+
+  task body();
+
+    shift_immediate_instruction item;
+    non_shift_immediate_instruction setup;
+    logic [4:0] temp_reg;
+    alu_op_t ops[3] = '{ALU_SLL, ALU_SRL, ALU_SRA};
+
+
+    `uvm_info(get_type_name(), "Calling shift_immediate_seq", UVM_LOW)
+
+    // Preload x1..x30 with varied, non-zero signed values before anything
+    // else runs. x0 stays hardwired zero
+    for (int r = 1; r <= 31; r++) begin
+      setup = non_shift_immediate_instruction::type_id::create("setup");
+      start_item(setup);
+      if (!setup.randomize() with { alu_op == ALU_ADD; rs1 == 0; rd == r; })
+          `uvm_error(get_type_name(), "randomize failed")
+      finish_item(setup);
+    end
+
+
+    // Try every valid shift amount for each shift operation type
+     foreach (ops[i]) begin
+      for (int j = 0; j <= 31; j++) begin
+
+        // Initialize a register with a random value
+        setup = non_shift_immediate_instruction::type_id::create("setup");
+        start_item(setup);
+        if (!setup.randomize() with { alu_op == ALU_ADD; })
+            `uvm_error(get_type_name(), "randomize failed")
+        temp_reg = setup.rd;
+        finish_item(setup);
+
+        // Apply a shift on that value
+        item = shift_immediate_instruction::type_id::create("item");
+        start_item(item);
+        if (!item.randomize() with { alu_op == ops[i]; shamt == j; rs1 == temp_reg; })
+            `uvm_error(get_type_name(), "randomize failed")
+        finish_item(item);
+
+      end
+    end
+
+    // Randomized stress
+    repeat (100) begin
+      item = shift_immediate_instruction::type_id::create("item");
+      start_item(item);
+      if (!item.randomize())
+          `uvm_error(get_type_name(), "randomize failed")
+      finish_item(item);
+    end
+  endtask: body
+endclass: shift_immediate_seq
+
+
+// 100 setup instructions + 100 store instructions * 3 store instruction types
+class store_seq extends computa_base_seq;
+  `uvm_object_utils(store_seq)
+
+  parameter int unsigned NUM_INSTRUCTIONS = 900;
+
+  function new(string name = "store_seq");
+    super.new(name);
+  endfunction: new
+
+  task body();
+
+    store_instruction item;
+    non_shift_immediate_instruction setup;
+    logic [4:0] temp_reg;
+    logic [31:0] temp_mem_addr;
+    store_funct3_t ops[3] = '{SB, SW, SW};
+
+    `uvm_info(get_type_name(), "Calling store_seq", UVM_LOW)
+
+    // Store word (all addresses are 4-byte word-aligned)
+    repeat (100) begin
+        
+        setup = non_shift_immediate_instruction::type_id::create("setup");
+        start_item(setup);
+        if (!setup.randomize() with { alu_op == ALU_ADD; imm == 0; rs1 == 0; rd == 1; })
+            `uvm_error(get_type_name(), "randomize failed")
+        temp_reg = setup.rd;
+        temp_mem_addr = setup.imm;
+        finish_item(setup);
+        
+        setup = non_shift_immediate_instruction::type_id::create("setup");
+        start_item(setup);
+        if (!setup.randomize() with { alu_op == ALU_ADD; imm % 4 == 0; imm < 'h800; rs1 == 0; rd == 1; })
+            `uvm_error(get_type_name(), "randomize failed")
+        temp_reg = setup.rd;
+        temp_mem_addr = setup.imm;
+        finish_item(setup);
+
+        item = store_instruction::type_id::create("item");
+        start_item(item);
+        if (!item.randomize() with { funct3 == SW; imm % 4 == 0; rs1 == temp_reg; temp_mem_addr + imm < 'h800; })
+            `uvm_error(get_type_name(), "randomize failed")
+        finish_item(item);
+    end
+
+    // SH
+    repeat (100) begin
+
+        setup = non_shift_immediate_instruction::type_id::create("setup");
+        start_item(setup);
+        if (!setup.randomize() with { alu_op == ALU_ADD; imm == 0; rs1 == 0; rd == 1; })
+            `uvm_error(get_type_name(), "randomize failed")
+        temp_reg = setup.rd;
+        temp_mem_addr = setup.imm;
+        finish_item(setup);
+
+        setup = non_shift_immediate_instruction::type_id::create("setup");
+        start_item(setup);
+        if (!setup.randomize() with { alu_op == ALU_ADD; imm % 2 == 0; imm < 'h800; rs1 == 0; rd == 1;})
+            `uvm_error(get_type_name(), "randomize failed")
+        temp_reg = setup.rd;
+        temp_mem_addr = setup.imm;
+        finish_item(setup);
+
+        item = store_instruction::type_id::create("item");
+        start_item(item);
+        if (!item.randomize() with { funct3 == SH; imm % 2 == 0; rs1 == temp_reg; temp_mem_addr + imm < 'h800; })
+            `uvm_error(get_type_name(), "randomize failed")
+        finish_item(item);
+    end
+
+
+    // SB
+    repeat (100) begin
+
+        setup = non_shift_immediate_instruction::type_id::create("setup");
+        start_item(setup);
+        if (!setup.randomize() with { alu_op == ALU_ADD; imm == 0; rs1 == 0; rd == 1; })
+            `uvm_error(get_type_name(), "randomize failed")
+        temp_reg = setup.rd;
+        temp_mem_addr = setup.imm;
+        finish_item(setup);
+
+        setup = non_shift_immediate_instruction::type_id::create("setup");
+        start_item(setup);
+        if (!setup.randomize() with { alu_op == ALU_ADD; imm < 'h800; rs1 == 0; rd == 1;})
+            `uvm_error(get_type_name(), "randomize failed")
+        temp_reg = setup.rd;
+        temp_mem_addr = setup.imm;
+        finish_item(setup);
+
+        item = store_instruction::type_id::create("item");
+        start_item(item);
+        if (!item.randomize() with { funct3 == SB; rs1 == temp_reg; temp_mem_addr + imm < 'h800; })
+            `uvm_error(get_type_name(), "randomize failed")
+        finish_item(item);
+
+    end
+
+  endtask: body
+
+endclass: store_seq

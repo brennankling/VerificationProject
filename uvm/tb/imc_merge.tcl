@@ -7,7 +7,7 @@
 
 # Edit TESTS below to match whatever -covtest names you've actually run.
 
-set TESTS {addi_test register_test non_shift_immediate_test}
+set TESTS {register_test non_shift_immediate_test shift_immediate_test store_test}
 
 set snapshots {}
 foreach t $TESTS {

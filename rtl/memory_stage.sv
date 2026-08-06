@@ -14,7 +14,7 @@ module memory_stage
     output logic [DATA_WIDTH-1:0] rd_data
 );
 
-    logic [DATA_WIDTH-1:0] mem [MEM_DEPTH];
+    logic [DATA_WIDTH-1:0] mem [MEM_DEPTH]; // 16KiB registered implementation for easy simulation
     logic [DATA_WIDTH-1:0] raw_word;
 
     assign raw_word = mem[addr[$clog2(MEM_DEPTH)+1:2]];

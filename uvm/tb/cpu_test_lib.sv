@@ -128,3 +128,36 @@ class non_shift_immediate_test extends base_test;
   endfunction: build_phase
 
 endclass: non_shift_immediate_test
+
+class shift_immediate_test extends base_test;
+
+  `uvm_component_utils(shift_immediate_test)
+
+  function new(string name, uvm_component parent);
+    super.new(name, parent);
+  endfunction: new
+
+  function void build_phase(uvm_phase phase);
+    program_size = shift_immediate_seq::NUM_INSTRUCTIONS;
+    super.build_phase(phase);
+    uvm_config_wrapper::set(this, "tb.computa.agent.sequencer.run_phase",
+                            "default_sequence",
+                            shift_immediate_seq::get_type());
+  endfunction: build_phase
+endclass: shift_immediate_test
+
+class store_test extends base_test;
+  `uvm_component_utils(store_test)
+
+  function new(string name, uvm_component parent);
+    super.new(name, parent);
+  endfunction: new
+
+  function void build_phase(uvm_phase phase);
+    program_size = store_seq::NUM_INSTRUCTIONS;
+    super.build_phase(phase);
+    uvm_config_wrapper::set(this, "tb.computa.agent.sequencer.run_phase",
+                            "default_sequence",
+                            store_seq::get_type());
+  endfunction: build_phase
+endclass: store_test

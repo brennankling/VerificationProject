@@ -53,6 +53,12 @@ class computa_monitor extends uvm_monitor;
       txn.pc          = vif.pc;
       txn.instruction = vif.instruction;
 
+      txn.mem_valid = vif.mem_read || vif.mem_write;
+      if (txn.mem_valid) begin
+        txn.mem_addr = vif.mem_addr;
+        txn.mem_data = vif.mem_write ? vif.mem_wr_data : vif.mem_rd_data;
+      end
+
       void'(begin_tr(txn, "computa_monitor_retire"));
 
       // Move past the edge so regs/mem reflect this instruction's
@@ -74,11 +80,14 @@ class computa_monitor extends uvm_monitor;
       end
       prev_regs = txn.regs;
 
+    // Looks like there was a bug where changes to mem at the following pc were being recorded
+    /*
       txn.mem_valid = vif.mem_read || vif.mem_write;
       if (txn.mem_valid) begin
         txn.mem_addr = vif.mem_addr;
         txn.mem_data = vif.mem_write ? vif.mem_wr_data : vif.mem_rd_data;
       end
+    */
 
       end_tr(txn);
 
