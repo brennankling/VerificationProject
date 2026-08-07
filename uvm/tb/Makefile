@@ -3,6 +3,7 @@
 # for full usage; this is just a quick reference.
 #
 #   make sim TEST=<name>              run one test (default addi_test)
+#   make simvision                    run the current run.f test with SimVision attached
 #   make coverage-report TEST=<name>  text coverage report for one test
 #   make coverage-merge               merge tests listed in imc_merge.tcl
 #   make coverage-gui [DB=<path>]     open a snapshot/merge in the IMC GUI
@@ -20,7 +21,7 @@ DB   ?= ./cov_work/scope/$(TEST)
 
 .PHONY: help
 help:
-	@echo "Targets: sim  coverage-report  coverage-merge  coverage-gui  install-spike  clean"
+	@echo "Targets: sim  simvision  coverage-report  coverage-merge  coverage-gui  install-spike  clean"
 	@echo "Valid TEST names: $(VALID_TESTS)"
 	@echo "See the comment header in this Makefile for full usage/examples."
 
@@ -35,6 +36,10 @@ sim: check-test
 	sed -i -E 's|^//\+UVM_TESTNAME=$(TEST)\r?$$|+UVM_TESTNAME=$(TEST)|' run.f
 	sed -i -E 's|^-covtest .*|-covtest $(TEST)|' run.f
 	$(XRUN) -uvm -uvmnocdnsextra -f run.f
+
+.PHONY: simvision
+simvision:
+	$(XRUN) -f run.f -gui -access rwc
 
 .PHONY: coverage-report
 coverage-report: check-test
