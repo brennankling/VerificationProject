@@ -34,7 +34,9 @@
 //+UVM_TESTNAME=register_test
 //+UVM_TESTNAME=non_shift_immediate_test
 //+UVM_TESTNAME=shift_immediate_test
-+UVM_TESTNAME=store_test
+//+UVM_TESTNAME=store_test
+//+UVM_TESTNAME=load_test
++UVM_TESTNAME=lui_test
 
 //+SVSEED=random
 
@@ -49,7 +51,7 @@
 // to see merged test results run:
 // /tools/software/cadence/vmanager/latest/tools.lnx86/vmgr/bin/imc -load ./cov_work/cov_merged &
 -coverage all
--covtest store_test
+-covtest lui_test
 -covoverwrite
 
 // compile files
