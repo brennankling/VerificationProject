@@ -56,7 +56,24 @@ class computa_monitor extends uvm_monitor;
       txn.mem_valid = vif.mem_read || vif.mem_write;
       if (txn.mem_valid) begin
         txn.mem_addr = vif.mem_addr;
-        txn.mem_data = vif.mem_write ? vif.mem_wr_data : vif.mem_rd_data;
+        if (vif.mem_write) begin
+          // memory_stage.sv only ever writes wr_data[7:0] (SB) or
+          // wr_data[15:0] (SH) into mem[], but vif.mem_wr_data is the raw,
+          // unmasked rs2 value, so it has to be narrowed here to match
+          // what actually landed in memory. Spike's commit log already
+          // reports stores at their real access width (see
+          // spike_ref.py::parse_commits), so without this the DUT side
+          // reports the whole source register instead of just the
+          // byte/halfword that was written, and looks like a mismatch
+          // any time the upper bits of rs2 are nonzero.
+          case (vif.instruction[14:12])
+            3'b000:  txn.mem_data = vif.mem_wr_data & 32'h0000_00FF; // SB
+            3'b001:  txn.mem_data = vif.mem_wr_data & 32'h0000_FFFF; // SH
+            default: txn.mem_data = vif.mem_wr_data;                 // SW
+          endcase
+        end else begin
+          txn.mem_data = vif.mem_rd_data;
+        end
       end
 
       void'(begin_tr(txn, "computa_monitor_retire"));

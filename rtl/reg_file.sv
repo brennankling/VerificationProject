@@ -23,7 +23,8 @@ module reg_file #(
         if (!rst_n) begin
             foreach (regs[i])
                 regs[i] <= 32'b0;
-        end else if (reg_write && rd_addr != 5'd0) begin
+        end else 
+        if (reg_write && rd_addr != 5'd0) begin
             regs[rd_addr] <= rd_data;
         end
     end

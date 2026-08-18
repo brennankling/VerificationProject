@@ -98,7 +98,12 @@ class computa_coverage extends uvm_component;
     cp_rd_x0: coverpoint (rd == 5'd0)
       iff (opcode inside {OP_REG, OP_IMM, OP_LOAD, OP_JAL, OP_JALR, OP_LUI, OP_AUIPC});
 
-    cross cp_opcode, cp_rd_x0;
+    // cp_rd_x0's iff excludes OP_STORE/OP_BRANCH/OP_FENCE/OP_SYSTEM, so
+    // it never samples on those opcodes -- the cross bins pairing them
+    // are structurally unreachable, not just untested.
+    cross cp_opcode, cp_rd_x0 {
+      ignore_bins unreachable_rd_x0 = binsof(cp_opcode) intersect {OP_STORE, OP_BRANCH, OP_FENCE, OP_SYSTEM};
+    }
   endgroup
 
   covergroup branch_cg;
