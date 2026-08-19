@@ -171,11 +171,11 @@ class load_test extends base_test;
   endfunction: new
 
   function void build_phase(uvm_phase phase);
-    program_size = load_instruction_seq::NUM_INSTRUCTIONS;
+    program_size = load_seq::NUM_INSTRUCTIONS;
     super.build_phase(phase);
     uvm_config_wrapper::set(this, "tb.computa.agent.sequencer.run_phase",
                             "default_sequence",
-                            load_instruction_seq::get_type());
+                            load_seq::get_type());
   endfunction: build_phase
 endclass: load_test
 
