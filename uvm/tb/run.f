@@ -1,4 +1,5 @@
-// To use: cd into the tb
+// To use: cd into uvm/tb
+// tcsh
 // setenv UVMHOME `ncroot`/tools/methodology/UVM/CDNS-1.1d
 // xrun -uvm -uvmnocdnsextra -f run.f
 
@@ -35,23 +36,22 @@
 //+UVM_TESTNAME=non_shift_immediate_test
 //+UVM_TESTNAME=shift_immediate_test
 //+UVM_TESTNAME=store_test
-//+UVM_TESTNAME=load_test
-+UVM_TESTNAME=lui_test
++UVM_TESTNAME=load_test
+//+UVM_TESTNAME=lui_test
 
 //+SVSEED=random
 
 // Code coverage (block/expr/toggle/fsm on the RTL) plus functional
 // coverage (computa_coverage.sv's covergroups), scoped to this test by
 // name. -covoverwrite resets this test's own snapshot each run instead
-// of accumulating across reruns of the same test -- drop it if you want
-// the opposite. See uvm/tb/imc_merge.tcl for merging multiple tests'
+// of accumulating across reruns of the same test. See uvm/tb/imc_merge.tcl for merging multiple tests'
 // coverage together once you've got more than one snapshot.
 
 // /tools/software/cadence/vmanager/latest/tools.lnx86/vmgr/bin/imc -load ./cov_work/scope/<name of the covtest (doesnt have to match anything in run.f)> &
 // to see merged test results run:
 // /tools/software/cadence/vmanager/latest/tools.lnx86/vmgr/bin/imc -load ./cov_work/cov_merged &
 -coverage all
--covtest lui_test
+-covtest load_test
 -covoverwrite
 
 // compile files

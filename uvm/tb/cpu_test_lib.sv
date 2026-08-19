@@ -162,7 +162,7 @@ class store_test extends base_test;
   endfunction: build_phase
 endclass: store_test
 
-/*
+ 
 class load_test extends base_test;
   `uvm_component_utils(load_test)
 
@@ -179,7 +179,6 @@ class load_test extends base_test;
   endfunction: build_phase
 endclass: load_test
 
-*/
 
 class lui_test extends base_test;
   `uvm_component_utils(lui_test)

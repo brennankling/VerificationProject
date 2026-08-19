@@ -14,9 +14,9 @@ XRUN        := xrun
 # Path to this project's Cadence vmanager install; likely different on
 # another machine. Override with e.g. `make coverage-report IMC=/path/to/imc`.
 IMC         ?= /tools/software/cadence/vmanager/latest/tools.lnx86/vmgr/bin/imc
-VALID_TESTS := base_test addi_test addi_extensive_test register_test non_shift_immediate_test shift_immediate_test store_test lui_test
+VALID_TESTS := base_test addi_test addi_extensive_test register_test non_shift_immediate_test shift_immediate_test store_test load_test lui_test
 
-TEST ?= lui_test
+TEST ?= load_test
 #DB   ?= ./cov_work/scope/$(TEST)
 DB   ?= ./cov_work/cov_merged
 
